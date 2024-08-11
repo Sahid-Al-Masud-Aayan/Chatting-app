@@ -1,7 +1,6 @@
 .maindiv{
     background-color: #4158D0;
-    background-image: linear-gradient(43deg, #002aff 0%, #d73fcd 46%, #27ece6 100%);
-    
+    background-image: linear-gradient(180deg, #050093 0%, #0042f6 46%, #00d3fd 105%);
 }
 .maindivtwo{
     display: flex;
