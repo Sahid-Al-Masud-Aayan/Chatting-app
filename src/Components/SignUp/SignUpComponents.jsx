@@ -1,13 +1,17 @@
 import React, { useState } from 'react'
 import { VscEye } from "react-icons/vsc";
 import { VscEyeClosed } from "react-icons/vsc";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import signUp from '../../../public/SignUp.json'
 import Lottie from 'lottie-react';
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { ToastContainer, Zoom, toast } from 'react-toastify';
+import { Bounce, ToastContainer, Zoom, toast } from 'react-toastify';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import 'react-toastify/dist/ReactToastify.css';
 import './SignUp.css'
+import {  CSSProperties } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
+import { BeatLoader } from 'react-spinners';
 
 const SignUpComponents = () => {
 //variables
@@ -21,6 +25,10 @@ const SignUpComponents = () => {
   const [password2Error, Password2changerError]=useState('')
   const [visible, hidden]= useState(false)
   const [visibleconfirm, hiddenconfirm]= useState(false)
+  const [Loader, SetLoader]= useState(false)
+  const navigator= useNavigate()
+  //firebase functions
+  const auth = getAuth();
 //functions
 const showconfirm = ()=>{
   hiddenconfirm(!visibleconfirm)
@@ -54,21 +62,64 @@ const finalSubmit = (e)=>{
     emailchangerError('Enter your email!')
   }if(!password){
     PasswordchangerError('Enter your password!')
-    }if(!password2){
-      Password2changerError('Enter your password!')
     }else{
-    toast.success('Account creation successful!', {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-      transition: Zoom,
+      SetLoader(true)
+
+
+      // firebase function
+      createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        
+        SetLoader(false)
+        toast.success('Account creation successful!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+          });
+          navigator('/')
+      })
+      .catch((error) => {
+
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(error);
+
+        SetLoader(false)
+        if(errorCode == 'auth/email-already-in-use'){
+          toast.error('Email already in use!', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+            });
+        }if(errorCode == 'auth/weak-password'){
+          toast.error('Password is very weak!', {
+            position: "top-right",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "colored",
+            transition: Bounce,
+            });
+        }
+        // ..
       });
   }
+
   // if(!name){
   //   namechangerError('Enter your name!')
   // }if(!email){
@@ -106,10 +157,10 @@ const finalSubmit = (e)=>{
               <p className='font-normal text-lg md:text-xl text-[#f8ff33] mb-4 md:mb-8'>The best chatting platform with the greatest features</p>
             </div>
             <p className='font-normal text-sm md:text-[16px] text-[#f8ff33] mb-[7px]'>Username</p>
-            <input onChange={NameMangaer} className=' h-12 md:h-[46px] w-full border-[#44d420] border-b-[#f0ff19] border-l-[#f0ff19] border-[4px] outline-none rounded-xl pl-5' type="text" />
+            <input onChange={NameMangaer} className=' h-12 md:h-lsepx] w-full border-[#44d420] border-b-[#f0ff19] border-l-[#f0ff19] border-[4px] outline-none rounded-xl pl-5' type="text" />
             <p className='text-xs font-semibold text-[#ff0000]'>{nameError}</p>
             <p className='font-normal text-sm md:text-[16px] text-[#f8ff33] mt-2  mb-[7px]'>Email</p>
-            <input onChange={emailMangaer} className=' h-12 md:h-[46px] w-full border-[#f0ff19] border-b-[#44d420] border-l-[#44d420] border-[4px] outline-none rounded-xl pl-5' type="email" />
+            <input onChange={emailMangaer} className=' h-12 md:h-lsepx] w-full border-[#f0ff19] border-b-[#44d420] border-l-[#44d420] border-[4px] outline-none rounded-xl pl-5' type="email" />
             <p className='text-xs font-semibold text-[#ff0000]'>{emailError}</p>
             <p className='font-normal text-sm md:text-[16px] text-[#f8ff33]  mt-2 mb-[7px]'>Password</p>
 
@@ -122,10 +173,10 @@ const finalSubmit = (e)=>{
 
               }             
                
-            <input onChange={passwordMangaer} className=' h-12 md:h-[46px] w-full border-[#44d420] border-b-[#f0ff19] border-l-[#f0ff19] border-[4px] outline-none rounded-xl pl-5' type={visible? 'text':'password'} />
+            <input onChange={passwordMangaer} className=' h-12 md:h-lsepx] w-full border-[#44d420] border-b-[#f0ff19] border-l-[#f0ff19] border-[4px] outline-none rounded-xl pl-5' type={visible? 'text':'password'} />
             </div>
             <p className='text-xs font-semibold text-[#ff0000]'>{passwordError}</p>
-            <p className='font-normal text-sm md:text-[16px] text-[#f8ff33] mt-2  mb-[7px]'>Confirm Password</p>
+            {/* <p className='font-normal text-sm md:text-[16px] text-[#f8ff33] mt-2  mb-[7px]'>Confirm Password</p>
             <div className="relative w-full">             
                {
                 visibleconfirm?
@@ -136,10 +187,17 @@ const finalSubmit = (e)=>{
               
               <input onChange={passwordMangaer2} className=' h-12 md:h-[46px] w-full border-[#f0ff19] border-b-[#44d420] border-l-[#44d420] border-[4px] outline-none rounded-xl pl-5' type={visibleconfirm? 'text':'password'} />
             </div>
-              <p className='text-xs font-semibold text-[#ff0000]'>{password2Error}</p>
+              <p className='text-xs font-semibold text-[#ff0000]'>{password2Error}</p> */}
             <div className="flex flex-col justify-center items-center">
-              <button type='submit' className='w-full h-12 md:h-[64px] bg-[#28ff02] duration-75 rounded-[32px] text-lg md:text-[25px] mt-[42px] font-medium text-white active:scale-[1.1]'>Sign Up</button>
-              <p className='font-normal text-sm md:text-[16px] text-[#f7fe2c] mt-[30px] items-center'>Already have an account? <span className='font-medium text-[#4ab922] hover:font-bold '><Link to='/'>Login</Link></span></p>
+              {
+                Loader?
+              <div className="w-full h-12 flex justify-center items-center md:h-[64px] bg-gradient-to-r from-[#fff23b] to-[#15ff00] duration-75 rounded-[32px] text-lg md:text-[25px] mt-[42px] font-medium text-white">
+           < BeatLoader color='#fff'/>
+              </div>
+              :
+              <button type='submit' className='w-full h-12 md:h-[64px] bg-gradient-to-r from-[#fff700] to-[#04ff00] duration-75 rounded-[32px] text-lg md:text-[25px] mt-[42px] font-medium text-white active:scale-[1.1]'>Sign Up</button>
+              }
+              <p className='font-normal text-sm md:text-[16px] text-[#f7ff18] mt-[30px] items-center'>Already have an account? <span className='font-medium text-[#4ab922] hover:font-bold '><Link to='/'>Login</Link></span></p>
             </div>
           </form>
           <div className='hidden md:flex w-full md:w-1/2 flex-col justify-center items-center'>
